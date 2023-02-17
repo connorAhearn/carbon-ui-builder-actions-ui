@@ -23,8 +23,8 @@ export const ActionsPane = ({ addAction }: any) => {
 	// Check for each action supported element type directly in recursive function
 	const actionSupportedElementTypes: string[] =
         Object.values(allComponents)
-            .filter(component => component.componentInfo.signals)
-            .map(component => component.componentInfo.type);
+        	.filter(component => component.componentInfo.signals)
+        	.map(component => component.componentInfo.type);
 
 	/**
      *
@@ -34,7 +34,7 @@ export const ActionsPane = ({ addAction }: any) => {
      *
      * @param actionableElements Array of codeContext.name values for elements that can have actions
      * @param items Recursive data structure, each item may have an array of items depending on the fragment design
-     * @returns final value of actionableElements, all the codeContext.name values for elements of our fragment that support actions
+     * @returns final value of actionableElements, all the codeContext.name values for elements of our fraxrgment that support actions
      */
 	const searchForActionableElements = (actionableElements: string[], items: any): string[] => {
 		for (let i = 0; i < items.length; i++) {
@@ -95,13 +95,12 @@ export const ActionsPane = ({ addAction }: any) => {
 	};
 
 	const template = (item: any, _index: number) => {
-
 		return (
 			<>
-            <h6 className={css`color: #323232; margin-bottom: 8px; font-weight: normal;`}>Signal Name</h6>
+            <h6 className={css`color: #323232; margin-bottom: 8px; font-weight: normal;`}>{item.text || 'New Action'}</h6>
             <Dropdown
             id='elementDropdown'
-            className={css`margin-bottom: 8px;`}
+            className={css`margin-bottom: 1rem; background-color: #fff`}
             size='sm'
             titleText='Element'
             label=''
@@ -119,6 +118,7 @@ export const ActionsPane = ({ addAction }: any) => {
             itemToString={(item: any) => (item ? item.text : '')}
             onChange={(slot: any) => handleActionUpdate(slot, item, 'slots')}
             selectedItem={{ text: item.slot }}
+            className={css`background-color: #fff`}
             />
 
 			</>
@@ -132,9 +132,13 @@ export const ActionsPane = ({ addAction }: any) => {
     updateItem={handleActionUpdate}
     template={template}
     defaultObject={{
-        signal: '',
-        slot: ''
-    }}
+			text: 'On click',
+			source: '',
+			signal: 'onclick',
+			destination: '',
+			slot: '',
+			id: ''
+		}}
 	/>
 	);
 };
