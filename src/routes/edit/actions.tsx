@@ -1,19 +1,31 @@
+import { useEffect, useState } from 'react';
+
+import { DraggableTileList } from '../../components';
 /* eslint-disable react/react-in-jsx-scope */
 // import React, { useEffect, useState } from 'react';
 import {
-	// Button,
 	Dropdown
 } from 'carbon-components-react';
-import { css } from 'emotion';
-import { useFragment } from '../../context';
 // import { isPropertySignature } from 'typescript';
 import { allComponents } from '../../fragment-components/index';
-import { DraggableTileList } from '../../components';
+import { css } from 'emotion';
+import { useFragment } from '../../context';
+
+interface ActionProps {
+	text: String;
+	source: String;
+	signal: String;
+	destination: String;
+	slot: String;
+	id: Number;
+}
 
 // TODO: Come up with a new name for file & Component
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ActionsPane = ({ addAction }: any) => {
 	const [fragment, setFragment] = useFragment();
+
+	const [actionState, setActionState] = useState<ActionProps[]>(fragment.data.actions || []);
 
 	//* ******************
 	// Elements Dropdown
@@ -83,32 +95,32 @@ export const ActionsPane = ({ addAction }: any) => {
 	];
 
 	const handleActionUpdate = (action: any, item: any, updateType: String) => {
-		const filteredActions = fragment.data.actions.map((val: any) => {
-			if (updateType === 'actions') {
-				val.destination = action.selectedItem.text;
-			} else if (updateType === 'slots') {
-				val.slot = action.selectedItem.text;
+		const filteredActions = actionState.map(currentAction => {
+			if (currentAction.id === item.id) {
+				if (updateType === 'actions') {
+					currentAction.destination = action.selectedItem.text;
+				} else if (updateType === 'slots') {
+					currentAction.slot = action.selectedItem.text;
+				}
 			}
-			return val;
+			return currentAction;
 		});
-
-		setFragment({
-			...fragment,
-			data: {
-				...fragment.data,
-				actions: filteredActions
-			}
-		});
+		setActionState(filteredActions);
 	};
 
-	const updateActionsList = (newList: any[]) => {
+	useEffect(() => {
+		const completedActions = actionState.filter(currentAction => currentAction.destination !== '' && currentAction.slot !== '');
 		setFragment({
 			...fragment,
 			data: {
 				...fragment.data,
-				actions: newList
+				actions: completedActions
 			}
 		});
+	}, [actionState]);
+
+	const updateActionsList = (newList: any[]) => {
+		setActionState(newList);
 	};
 
 	const template = (item: any, _index: number) => {
@@ -144,7 +156,7 @@ export const ActionsPane = ({ addAction }: any) => {
 
 	return (
     <DraggableTileList
-    dataList={fragment.data.actions}
+    dataList={actionState}
     setDataList={updateActionsList}
     updateItem={handleActionUpdate}
     template={template}
@@ -154,7 +166,7 @@ export const ActionsPane = ({ addAction }: any) => {
 			signal: 'onclick',
 			destination: '',
 			slot: '',
-			id: ''
+			id: actionState.length
 		}}
 	/>
 	);
