@@ -101,6 +101,10 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 		});
 	}, [actionState]);
 
+	useEffect(() => {
+		setActionState(relatedActions);
+	}, [sourceComponent]);
+
 	const updateActionsList = (newList: any[]) => {
 		setActionState(newList);
 	};
