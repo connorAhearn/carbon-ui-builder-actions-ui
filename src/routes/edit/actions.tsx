@@ -46,26 +46,43 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
      *
      * @param actionableElements Array of codeContext.name values for elements that can have actions
      * @param items Recursive data structure, each item may have an array of items depending on the fragment design
+     * @param idNameMap Object with keys that are code context names of the actionable items and value containing the corresponding IDs
+     * @param nameIdMap Object with keys that are IDs of the actionable items and value containing the corresponding code context names
      * @returns final value of actionableElements, all the codeContext.name values for elements of our fraxrgment that support actions
      */
-	const searchForActionableElements = (actionableElements: string[], items: any): string[] => {
+	const searchForActionableElements =
+	(actionableElements: string[], items: any, idNameMap: any, nameIdMap: any): {actionableElements: string[]; idNameMap: any; nameIdMap: any} => {
 		items.forEach((item: any) => {
 			if (actionSupportedElementTypes.includes(item.type)) {
 				actionableElements = [
 					...actionableElements,
 					item.codeContext.name
 				];
+				nameIdMap = {
+					...nameIdMap,
+					[item.codeContext.name]: item.id
+				};
+				idNameMap = {
+					...idNameMap,
+					[item.id]: item.codeContext.name
+				};
 			}
 
 			if (item.items) {
-				actionableElements = searchForActionableElements(actionableElements, item.items);
+				const searchResult = searchForActionableElements(actionableElements, item.items, idNameMap, nameIdMap);
+				idNameMap = searchResult.idNameMap;
+				actionableElements = searchResult.actionableElements;
+				nameIdMap = searchResult.nameIdMap;
 			}
 
 		});
-		return actionableElements;
+		return { actionableElements: actionableElements, idNameMap: idNameMap, nameIdMap: nameIdMap };
 	};
 
-	const actionableElements = searchForActionableElements([], fragment.data.items);
+	const actionableElementsSearchResult = searchForActionableElements([], fragment.data.items, {}, {});
+	const actionableElements = actionableElementsSearchResult.actionableElements;
+	const idNameMap = actionableElementsSearchResult.idNameMap;
+	const nameIdMap = actionableElementsSearchResult.nameIdMap;
 	console.log('actionableElements', actionableElements);
 	const elementDropdownItems = actionableElements.map(element => ({ text: element }));
 
@@ -80,7 +97,7 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 		const filteredActions = actionState.map(currentAction => {
 			if (currentAction.id === item.id) {
 				if (updateType === 'actions') {
-					currentAction.destination = action.selectedItem.text;
+					currentAction.destination = nameIdMap[action.selectedItem.text];
 				} else if (updateType === 'slots') {
 					currentAction.slot = action.selectedItem.text;
 				} else if (updateType === 'slotParam') {
@@ -126,7 +143,7 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
             items={elementDropdownItems}
             itemToString={(item: any) => (item ? item.text : '')}
             onChange={(element: any) => handleActionUpdate(element, item, 'actions')}
-            selectedItem={{ text: item.destination }}
+            selectedItem={{ text: idNameMap[item.destination] }}
             />
             <Dropdown
             id='slotDropdown'
