@@ -204,7 +204,7 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
     defaultObject={{
 			text: 'On click',
 			source: sourceComponent.id,
-			signal: 'onclick',
+			signal: 'click',
 			destination: '',
 			slot: '',
 			slot_param: '',
