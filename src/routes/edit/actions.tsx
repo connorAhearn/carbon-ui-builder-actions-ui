@@ -10,6 +10,7 @@ import {
 import { allComponents } from '../../fragment-components/index';
 import { css } from 'emotion';
 import { useFragment } from '../../context';
+import _ from 'lodash';
 
 interface ActionProps {
 	text: String;
@@ -88,10 +89,16 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 
 	// TODO: Ideally should be implemented using AllComponents
 	// Current feature set is just disabling buttons so this implementation fits
-	const slotDropdownItems: { text: string }[] = [
-		{ text: 'Toggle Disable' }
-		// { text: 'Toggle Visibility' }
-	];
+	// const slotDropdownItems: { text: string }[] = [
+	// 	{ text: 'Toggle Disable' }
+	// 	// { text: 'Toggle Visibility' }
+	// ];
+	
+	// Object.values(availableSlots).map(slot => ({ text: slot })) in line 177 is exactly same as slotDropdownItems
+	// This object acts as a map that maps the slot field in JSON to the UI slot dropdown selected item
+	const availableSlots: any = {
+		'isDisabled': 'Toggle Disable'
+	};
 
 	const handleActionUpdate = (action: any, item: any, updateType: String) => {
 		const filteredActions = actionState.map(currentAction => {
@@ -99,9 +106,26 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 				if (updateType === 'actions') {
 					currentAction.destination = nameIdMap[action.selectedItem.text];
 				} else if (updateType === 'slots') {
-					currentAction.slot = action.selectedItem.text;
+					// hardcode the slot field in JSON export
+					switch (action.selectedItem.text) {
+						case 'Toggle Disable':
+							currentAction.slot = 'isDisabled';
+							break;
+						default:
+							currentAction.slot = action.selectedItem.text;
+					}
 				} else if (updateType === 'slotParam') {
-					currentAction.slot_param = action.selectedItem.text;
+					// hardcode the slot_param field in JSON export
+					switch (action.selectedItem.text) {
+						case 'True':
+							currentAction.slot_param = 'true';
+							break;
+						case 'False':
+							currentAction.slot_param = 'false';
+							break;
+						default:
+							currentAction.slot_param = action.selectedItem.text;
+					}
 				}
 			}
 			return currentAction;
@@ -150,10 +174,10 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
             size='sm'
             titleText='Slot'
             label=''
-            items={slotDropdownItems}
+            items={Object.values(availableSlots).map(slot => ({ text: slot }))}
             itemToString={(item: any) => (item ? item.text : '')}
             onChange={(slot: any) => handleActionUpdate(slot, item, 'slots')}
-            selectedItem={{ text: item.slot }}
+            selectedItem={{ text: availableSlots[item.slot] }}
             className={css`background-color: #fff`}
             />
 			<Dropdown
@@ -164,7 +188,7 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 			items={[{ text: 'True' }, { text: 'False' }]}
 			itemToString={(item: any) => (item ? item.text : '')}
 			onChange={(slot: any) => handleActionUpdate(slot, item, 'slotParam')}
-			selectedItem={{ text: item.slot_param }}
+			selectedItem={{ text: _.capitalize(item.slot_param) }}		// hardcode true/false into True/False to be shown in the dropdown
 			className={css`background-color: #fff`}
             />
 			</>
