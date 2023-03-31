@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { DraggableTileList } from '../../components';
+import { DraggableTileList } from '../../sdk/src/draggable-list';
 /* eslint-disable react/react-in-jsx-scope */
 // import React, { useEffect, useState } from 'react';
 import {
@@ -19,6 +19,11 @@ interface ActionProps {
 	slot: String;
 	slot_param: String;
 	id: Number;
+}
+
+interface ElementInfo {
+	name: string;
+	id: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -48,12 +53,16 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
      * @param items Recursive data structure, each item may have an array of items depending on the fragment design
      * @returns final value of actionableElements, all the codeContext.name values for elements of our fraxrgment that support actions
      */
-	const searchForActionableElements = (actionableElements: string[], items: any): string[] => {
+	const searchForActionableElements = (actionableElements: ElementInfo[], items: any): ElementInfo[] => {
 		items.forEach((item: any) => {
 			if (actionSupportedElementTypes.includes(item.type)) {
+				const itemToAdd = {
+					...item.codeContext,
+					id: item.id
+				};
 				actionableElements = [
 					...actionableElements,
-					item.codeContext.name
+					itemToAdd
 				];
 			}
 
@@ -67,12 +76,12 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 
 	const actionableElements = searchForActionableElements([], fragment.data.items);
 	console.log('actionableElements', actionableElements);
-	const elementDropdownItems = actionableElements.map(element => ({ text: element }));
+	const elementDropdownItems = actionableElements.map(element => ({ text: element.name, id: element.id }));
 
 	// TODO: Ideally should be implemented using AllComponents
 	// Current feature set is just disabling buttons so this implementation fits
 	const slotDropdownItems: { text: string }[] = [
-		{ text: 'Toggle Disable' }
+		{ text: 'disabled' }
 		// { text: 'Toggle Visibility' }
 	];
 
@@ -80,7 +89,7 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 		const filteredActions = actionState.map(currentAction => {
 			if (currentAction.id === item.id) {
 				if (updateType === 'actions') {
-					currentAction.destination = action.selectedItem.text;
+					currentAction.destination = action.selectedItem.id;
 				} else if (updateType === 'slots') {
 					currentAction.slot = action.selectedItem.text;
 				} else if (updateType === 'slotParam') {
@@ -113,7 +122,6 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
 	};
 
 	const template = (item: any, _index: number) => {
-		console.log(item)
 		return (
 			<>
             <h6 className={css`color: #323232; margin-bottom: 8px; font-weight: normal;`}>{item.text || 'New Action'}</h6>
@@ -163,7 +171,7 @@ export const ActionsPane = ({ addAction, sourceComponent }: any) => {
     defaultObject={{
 			text: 'On click',
 			source: sourceComponent.id,
-			signal: 'onclick',
+			signal: 'click',
 			destination: '',
 			slot: '',
 			slot_param: '',
