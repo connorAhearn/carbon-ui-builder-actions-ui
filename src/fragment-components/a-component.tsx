@@ -1,7 +1,7 @@
 import { Draggable32, TrashCan32 } from '@carbon/icons-react';
 import React, { useRef, useState } from 'react';
 import { css, cx } from 'emotion';
-import { drag, getDropIndex } from '../routes/edit/tools';
+import { drag, getDropIndex } from '../sdk/src/tools';
 
 import { updatedState } from '../components';
 import { useFragment } from '../context';

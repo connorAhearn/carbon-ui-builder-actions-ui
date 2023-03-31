@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, ExpandableSearch } from 'carbon-components-react';
 import { CssClasses } from '../types';
+import { stringToCssClassName } from '../utils';
 
 export interface SearchState {
 	type: string;
@@ -11,16 +12,17 @@ export interface SearchState {
 	value?: string;
 	closeButtonLabelText?: string;
 	defaultValue?: string;
-	disabled?: boolean;
+	disabled?: string | boolean;
 	light?: boolean;
 	role?: string;
 	expandable: boolean;
 	inputSize: string;
 	searchType: string;
 	cssClasses?: CssClasses[];
-	codeContext?: {
+	codeContext: {
 		name: string;
 	};
+	style?: any;
 }
 
 export const UISearchInput = ({ state, setState, name }: {
@@ -28,14 +30,25 @@ export const UISearchInput = ({ state, setState, name }: {
 	name?: string;
 	setState: (state: any) => void;
 	setGlobalState: (state: any) => void;
+	sendSignal: (id: number | string, signal: string) => void;
 }) => {
 	if (state.type !== 'search') {
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		return <></>;
 	}
 
+	let cssClasses = state.cssClasses?.map((cc: any) => cc.id).join(' ') || '';
+
+	if (state.style) {
+		if (cssClasses.length > 0) {
+			cssClasses += ' ';
+		}
+		cssClasses += stringToCssClassName(state.codeContext.name);
+	}
+
 	return state.expandable
 		? <ExpandableSearch
+			className={cssClasses}
 			size={state.inputSize}
 			disabled={state.disabled}
 			autoComplete={state.autocomplete}
@@ -53,7 +66,7 @@ export const UISearchInput = ({ state, setState, name }: {
 		size={state.inputSize}
 		labelText={state.label}
 		placeholder={state.placeholder}
-		className={state.cssClasses?.map((cc: any) => cc.id).join(' ')}
+		className={cssClasses}
 		id={state.codeContext?.name}
 		autoComplete={state.autocomplete}
 		closeButtonLabelText={state.closeButtonLabelText}

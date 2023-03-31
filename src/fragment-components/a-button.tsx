@@ -6,10 +6,11 @@ import {
 	TextInput
 } from 'carbon-components-react';
 import { angularClassNamesFromComponentObj, nameStringToVariableString, reactClassNamesFromComponentObj } from '../utils/fragment-tools';
+import { css, cx } from 'emotion';
 
 import { ActionsPane } from '../routes/edit/actions';
-import { css } from 'emotion';
 import image from './../assets/component-icons/button.svg';
+import { styleObjectToString } from '../ui-fragment/src/utils';
 // import { time } from 'console';
 import { useFragment } from '../context';
 
@@ -136,7 +137,10 @@ export const AButton = ({
 			kind={componentObj.kind}
 			size={componentObj.size}
 			disabled={componentObj.disabled}
-			className={componentObj.cssClasses?.map((cc: any) => cc.id).join(' ')}>
+			className={cx(
+				componentObj.cssClasses?.map((cc: any) => cc.id).join(' '),
+				css`${styleObjectToString(componentObj.style)}`
+			)}>
 				{children}
 			</Button>
 		</AComponent>
